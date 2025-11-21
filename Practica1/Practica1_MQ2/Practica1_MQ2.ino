@@ -43,8 +43,6 @@ void setup() {
   M5.Lcd.setTextColor(GREEN);
   M5.Lcd.setTextSize(2);
   M5.Lcd.setCursor(0, 0);
-  M5.Lcd.println("PRACTICA 1 MQ-2");
-  M5.Lcd.println("------------------");
   delay(1000);
 
   calibrarSensorReal();   // Usar esta para modo real
@@ -92,6 +90,7 @@ void loop() {
 // ----------------------------------------------------------
 // calibrarSensorSimulado()
 // ----------------------------------------------------------
+#ifdef DEBUG
 
 void calibrarSensorSimulado() {
   // Supuestos simulados más realistas
@@ -106,13 +105,14 @@ void calibrarSensorSimulado() {
   Serial.print("R0 = "); Serial.println(R0, 2);
   M5.Lcd.println("Calibracion simulada OK");
 }
-
+#endif
 // ----------------------------------------------------------
 // calibrarSensorReal() - CORREGIDO
 // ----------------------------------------------------------
 
 void calibrarSensorReal() {
-  M5.Lcd.println("Calibrando sensor real...");
+
+
   delay(2000);  // Más tiempo para estabilización
 
   Serial.println(">>> Iniciando calibracion real");
@@ -455,7 +455,7 @@ void mostrarPorLCD() {
   M5.Lcd.setTextColor(GREEN);
   M5.Lcd.setTextSize(1);
   M5.Lcd.setCursor(0, 220);
-  M5.Lcd.println("Presiona 'a' en Monitor Serie para ver datos");
+
 }
 
 // ----------------------------------------------------------

@@ -10,13 +10,13 @@
 #define CONFIG_MQ2_H_INCLUIDO
 // ----------------------------------------------------------
 
-#include <Arduino.h>
+//#include <Arduino.h>
 #include <M5Stack.h>
 
 // ----------------------------------------------------------
 // ------------------- Definiciones generales ----------------
 // ----------------------------------------------------------
-
+//#define DEBUG
 #define PIN_SENSOR_GAS 36          // Pin analógico conectado al sensor MQ-2
 #define N_MUESTRAS_PROCESO 200     // Número total de muestras para cálculo
 #define N_MUESTRAS_LCD 100         // Muestras entre actualizaciones LCD
