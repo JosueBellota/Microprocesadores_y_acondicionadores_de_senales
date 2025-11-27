@@ -43,10 +43,20 @@ void task_pulsador_A(void* arg) {
       int cuenta;
       // Espero por la notificación de la ISR
       if(xSemaphoreTake(xSemaphore_A,portMAX_DELAY) == pdTRUE) {
+            
+            // INICIO SECCIÓN CRÍTICA
+            // Se utiliza un spinlock (mux) para garantizar que la lectura, modificación y escritura
+            // de la variable compartida 'cEvents' sea una operación atómica.
+            // Esto previene que la tarea 'task_pulsador_B' pueda modificar 'cEvents'
+            // mientras esta tarea está trabajando con ella, evitando una condición de carrera.
+            portENTER_CRITICAL(&mux);
             cuenta = cEvents;
             Delay_c(a_end,b_end);
             cuenta += incr;
-            cEvents = cuenta;  
+            cEvents = cuenta;
+            portEXIT_CRITICAL(&mux);
+            // FIN SECCIÓN CRÍTICA
+
 //            cEvents ++;
             Serial.print("Pulsador A presionado. cEvents = ");
             Serial.println(cEvents);
@@ -57,7 +67,17 @@ void task_pulsador_B(void* arg) {
    while(1) {
       // Espero por la notificación de la ISR
       if(xSemaphoreTake(xSemaphore_B,portMAX_DELAY) == pdTRUE) {
+            
+            // INICIO SECCIÓN CRÍTICA
+            // Al igual que en la Tarea A, se protege el acceso a 'cEvents'.
+            // Sin esta protección, esta tarea podría leer un valor de 'cEvents',
+            // luego la Tarea A podría modificarlo, y finalmente esta tarea
+            // sobrescribiría el cambio de la Tarea A con un valor obsoleto.
+            portENTER_CRITICAL(&mux);
             cEvents ++;
+            portEXIT_CRITICAL(&mux);
+            // FIN SECCIÓN CRÍTICA
+
             Serial.print("Pulsador B presionado. cEvents = ");
             Serial.println(cEvents);
       }

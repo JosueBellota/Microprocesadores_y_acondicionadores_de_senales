@@ -8,6 +8,7 @@ SemaphoreHandle_t xSemaphore_A = NULL;
 SemaphoreHandle_t xSemaphore_B = NULL;
 
 //declarar el manejador para el semáforo mutex como variable global
+SemaphoreHandle_t xMutex = NULL;
 
 
 static int cEvents; 
@@ -32,10 +33,21 @@ void task_pulsador_A(void* arg) {
       int cuenta;
       // Espero por la notificación de la ISR
       if(xSemaphoreTake(xSemaphore_A,portMAX_DELAY) == pdTRUE) {
-            cuenta = cEvents;
-            Delay_c(a_end,b_end);
-            cuenta += incr;
-            cEvents = cuenta;
+            
+            // Tomamos el mutex antes de acceder a la variable compartida 'cEvents'.
+            // Si el mutex está disponible, esta tarea lo toma y continúa.
+            // Si no está disponible (porque la Tarea B lo tiene), esta tarea se bloqueará
+            // (sin consumir CPU) hasta que el mutex sea liberado.
+            if(xSemaphoreTake(xMutex, portMAX_DELAY) == pdTRUE){
+              cuenta = cEvents;
+              Delay_c(a_end,b_end);
+              cuenta += incr;
+              cEvents = cuenta;
+
+              // Liberamos el mutex para que otras tareas puedan usarlo.
+              xSemaphoreGive(xMutex);
+            }
+
             Serial.print("Pulsador A presionado. cEvents = ");
             Serial.println(cEvents);
       }
@@ -46,7 +58,16 @@ void task_pulsador_B(void* arg) {
    while(1) {
       // Espero por la notificación de la ISR
       if(xSemaphoreTake(xSemaphore_B,portMAX_DELAY) == pdTRUE) {
-            cEvents ++;
+
+            // Se realiza el mismo procedimiento de tomar y liberar el mutex
+            // que en la Tarea A para garantizar la integridad de 'cEvents'.
+            if(xSemaphoreTake(xMutex, portMAX_DELAY) == pdTRUE){
+              cEvents ++;
+
+              // Liberamos el mutex.
+              xSemaphoreGive(xMutex);
+            }
+
             Serial.print("Pulsador B presionado. cEvents = ");
             Serial.println(cEvents);
       }
@@ -66,6 +87,9 @@ void setup() {
    xSemaphore_B = xSemaphoreCreateBinary();
    
    //Se crea el Mutex
+   // Un mutex es un tipo especial de semáforo binario diseñado para la exclusión mutua.
+   // A diferencia de un semáforo binario, idealmente solo la tarea que toma el mutex debería liberarlo.
+   xMutex = xSemaphoreCreateMutex();
     
    // creo la tarea task_pulsador
    xTaskCreate(task_pulsador_A, "task_pulsador", 2048, NULL, 4, NULL);
