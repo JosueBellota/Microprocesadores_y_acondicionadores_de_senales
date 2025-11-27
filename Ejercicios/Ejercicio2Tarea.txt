@@ -1,0 +1,4 @@
+Complete el programa Ejer_2_clase.ino utilizando funciones de Arduino para configurar los 4 timers del ESP32 para que generen interrupciones periódicas de 1, 2, 0.5 y 1.5 seg y que ejecuten las rutinas de atención a la interrupciones ISR_Timer0, ISR_Timer1, ISR_Timer2 y ISR_Timer3.
+Los timers se activarán cuando se pulse el botón A y se deshabilitarán cuando se pulse el botón B.
+
+Enviar el programa cumplimentado.

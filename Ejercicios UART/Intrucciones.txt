@@ -1,0 +1,7 @@
+Ejercicio 4. Tema UART
+
+Realizar un programa que reciba, desde el monitor serie, los caracteres correspondientes a un número decimal de varios dígitos, obtenga su valor decimal y lo muestre por el monitor serie. Para ello tenga en cuenta:
+
+- que la transmisión a través de la UART se realiza utilizando el código ASCII, esto es si vamos a transmitir el número 134 se transmitirá el código ASCII del caracter 1 (en decimal 49), luego el código ASCII del caracter 3 (en decimal 51) y por último el del caracter 4 (en decimal 52).
+
+Envia
