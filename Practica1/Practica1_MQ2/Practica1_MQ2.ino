@@ -2,8 +2,8 @@
 // ----------------------------------------------------------
 // Practica1_MQ2.ino - CORREGIDO PROBLEMAS MATEMÁTICOS
 // ----------------------------------------------------------
-// Autor: Josue Bellota Ichaso
-// Fecha: [YYYY-MM-DD]
+// Autor: Josue Bellota Ichaso, Nuria Wagner Llorens
+// Fecha: 11-1-2025
 // ----------------------------------------------------------
 
 #include "ConfigMQ2.h"
