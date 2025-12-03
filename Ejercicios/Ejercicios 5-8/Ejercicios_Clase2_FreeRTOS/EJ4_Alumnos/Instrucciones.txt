@@ -1,0 +1,6 @@
+Generar una interrupción al pulsar el botón A del M5Stack (asociado al pin39). Utilice para esto la función attachInterrupt
+La rutina de atención a la interrupción (ISR) tiene que activar un semáforo (S1) que sincroniza una tarea
+La tarea recogerá el semáforo (S1) y escribirá en el monitor serie el mensaje "Botón A pulsado"
+Utilice las funciones xSemaphoreCreateBinary,  xSemaphoreGivefromISR,  xSemaphoreTake y xTaskCreate.
+
+Declare el semáforo con el tipo SemaphoreHandle_t.
