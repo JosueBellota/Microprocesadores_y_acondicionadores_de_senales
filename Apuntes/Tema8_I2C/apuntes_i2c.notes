@@ -1,0 +1,73 @@
+# Tema 8: Comunicación I2C
+
+El bus I2C (Inter-Integrated Circuit) es un protocolo de comunicación en serie síncrono que permite la comunicación entre un microcontrolador (maestro) y varios dispositivos periféricos (esclavos) utilizando solo dos cables.
+
+## 1. Fundamentos del Bus I2C
+
+- **I2C**: Significa "Inter-Integrated Circuit". Fue desarrollado por Philips en los años 80. A veces también se le conoce como TWI (Two-Wire Interface).
+- **Conexión Física**:
+    - **SDA (Serial Data)**: Línea para la transmisión de datos.
+    - **SCL (Serial Clock)**: Línea para la señal de reloj que sincroniza la comunicación.
+    - Se requieren **resistencias de pull-up** en ambas líneas para mantenerlas en un estado alto (HIGH) cuando no hay comunicación activa.
+- **Roles de Dispositivos**:
+    - **Maestro (Master)**: Inicia la comunicación, genera la señal de reloj (SCL) y direcciona a los esclavos. Puede haber más de un maestro en el bus (modo multi-maestro).
+    - **Esclavo (Slave)**: Espera a ser direccionado por el maestro para enviar o recibir datos. Cada esclavo tiene una dirección única en el bus.
+- **Direccionamiento**:
+    - Cada dispositivo esclavo tiene una dirección de 7 o 10 bits, que debe ser única en el bus.
+    - El maestro inicia la comunicación enviando una **condición de START** seguida de la dirección del esclavo con el que quiere comunicarse y un bit que indica si la operación es de lectura (READ) o escritura (WRITE).
+- **Protocolo de Comunicación**:
+    - **Condición de START**: Una transición de SDA de HIGH a LOW mientras SCL está en HIGH.
+    - **Condición de STOP**: Una transición de SDA de LOW a HIGH mientras SCL está en HIGH.
+    - **Transmisión de Datos**: Los datos se envían en paquetes de 8 bits (un byte), seguidos de un bit de **reconocimiento (ACK)** o **no reconocimiento (NACK)**. El receptor (que puede ser el maestro o el esclavo) genera el ACK para indicar que ha recibido el byte correctamente.
+- **Velocidades**:
+    - **Modo Estándar**: 100 KHz
+    - **Modo Rápido (Fast Mode)**: 400 KHz
+
+## 2. I2C en el ESP32
+
+- El ESP32 dispone de **2 controladores I2C** independientes, lo que permite gestionar dos buses I2C de forma simultánea.
+- Los pines SDA y SCL pueden ser asignados a cualquiera de los pines GPIO del ESP32.
+- En la placa **M5Stack**, los pines por defecto para el bus I2C principal (puerto A) son:
+    - **SDA: GPIO 21**
+    - **SCL: GPIO 22**
+
+## 3. Programación con Arduino (Librería `Wire`)
+
+La forma más sencilla de usar I2C en el entorno Arduino es a través de la librería `Wire`.
+
+- `Wire.begin(sda, scl)`: Inicializa el bus I2C y, opcionalmente, configura los pines SDA y SCL. Si se llama sin parámetros, asume el rol de maestro. Para actuar como esclavo, se le pasa la dirección del dispositivo como argumento.
+- `Wire.beginTransmission(address)`: Inicia una transmisión a un esclavo con la dirección `address`.
+- `Wire.write(data)`: Envía datos al esclavo.
+- `Wire.endTransmission()`: Finaliza la transmisión.
+- `Wire.requestFrom(address, quantity)`: Solicita `quantity` bytes de un esclavo con la dirección `address`.
+- `Wire.available()`: Devuelve el número de bytes disponibles para leer.
+- `Wire.read()`: Lee un byte del esclavo.
+- `Wire.setClock(frequency)`: Configura la velocidad del reloj SCL.
+
+## 4. Ejemplo Práctico: Sensor BMP180
+
+El BMP180 es un sensor digital de presión y temperatura que se comunica por I2C.
+
+- **Dirección I2C**: La dirección por defecto del BMP180 es `0x77`.
+- **Funcionamiento Básico**:
+    1.  El sensor mide temperatura y presión de forma no compensada.
+    2.  Posee una E2PROM interna con **valores de calibración** únicos para cada sensor.
+    3.  Para obtener los valores reales, el microcontrolador debe leer los datos no compensados y los valores de calibración, y luego aplicar una serie de cálculos matemáticos.
+- **Flujo de Medida**:
+    1.  **Leer coeficientes de calibración**: Se leen una sola vez al inicio del programa desde la E2PROM del sensor.
+    2.  **Iniciar medición de temperatura**: Se escribe un comando en un registro de control del sensor.
+    3.  **Esperar**: La conversión ADC del sensor toma un tiempo (aprox. 4.5 ms).
+    4.  **Leer el valor de temperatura no compensado (UT)**.
+    5.  **Iniciar medición de presión**: Se escribe otro comando en el registro de control.
+    6.  **Esperar**: El tiempo de conversión depende de la precisión configurada.
+    7.  **Leer el valor de presión no compensado (UP)**.
+    8.  **Calcular**: Usar los valores UT, UP y los coeficientes de calibración para obtener la temperatura y presión reales.
+
+## 5. Ejemplos de Código y Ejercicios
+
+Los ejercicios de esta sección están diseñados para aplicar los conceptos anteriores.
+
+- **`01_Basic_I2C_Scanner`**: Escanea el bus I2C para detectar las direcciones de todos los dispositivos esclavos conectados.
+- **`02_Master_Writer`**: Ejemplo de un dispositivo maestro que envía datos a un esclavo.
+- **`03_Slave_Receiver`**: Ejemplo de un dispositivo esclavo que recibe los datos del maestro.
+- **`04_BMP180_Sensor`**: Implementación completa para leer los datos del sensor BMP180, incluyendo la lectura de la ID del dispositivo, el inicio de mediciones y la lectura de resultados.
