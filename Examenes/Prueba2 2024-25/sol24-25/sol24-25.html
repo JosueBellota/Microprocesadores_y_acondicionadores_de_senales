@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solución Examen Microprocesadores (Prueba 2)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 10px;
+        }
+        .exercise {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        .exercise-header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .statement {
+            padding: 20px;
+            background-color: #fff;
+            border-bottom: 1px solid #eee;
+        }
+        .statement strong {
+            color: #555;
+            display: block;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 1px;
+        }
+        .solution {
+            padding: 20px;
+            background-color: #e8f5e9; /* Light green background for solutions */
+            border-left: 5px solid #4caf50;
+        }
+        .solution strong {
+            color: #2e7d32;
+            display: block;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 1px;
+        }
+        pre {
+            background-color: #272822;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
+            background-color: #f0f0f0;
+            padding: 2px 5px;
+            border-radius: 3px;
+            color: #d32f2f;
+        }
+        .math-block {
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: 'Cambria Math', 'Times New Roman', serif;
+            font-size: 1.1em;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        .logic-step {
+            margin-bottom: 10px;
+            padding-left: 15px;
+            border-left: 3px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Solución Examen Prueba 2 (2024-25)</h1>
+
+    <!-- EJERCICIO 1 -->
+    <div class="exercise">
+        <div class="exercise-header">EJERCICIO 1 (ADC)</div>
+        
+        <div class="statement">
+            <strong>Enunciado 1.1</strong>
+            Configura el ADC1 utilizando la librería de esp-idf. Incluye la variable adc_valor con la lectura del canal específico del ADC1. (GPIO35, 11 bits).
+        </div>
+        <div class="solution">
+            <strong>Solución</strong>
+            <pre>
+// 1. Configurar resolución (ancho) a 11 bits
+adc1_config_width(ADC_WIDTH_BIT_11);
+
+// 2. Configurar atenuación (GPIO35 es Canal 7)
+// Para leer 3.3V necesitamos la atenuación de 11dB
+adc1_config_channel_atten(ADC1_CHANNEL_7, ADC_ATTEN_DB_11);
+
+// 3. Leer valor
+int adc_valor = adc1_get_raw(ADC1_CHANNEL_7);</pre>
+        </div>
+
+        <div class="statement">
+            <strong>Enunciado 1.2</strong>
+            Calcula el valor digital que leerá el ADC1 cuando se tenga una señal de salida del sensor de 1.8 V. (Max 3.3V, 11 bits).
+        </div>
+        <div class="solution">
+            <strong>Solución (Lógica Simple)</strong>
+            <p>Usamos una regla de tres directa. Sabemos que con <strong>11 bits</strong> el valor máximo (que corresponde a 3.3V) es <strong>2047</strong> (2<sup>11</sup> - 1).</p>
+            
+            <div class="math-block">
+                3.3 V  ————>  2047<br>
+                1.8 V  ————>   X
+            </div>
+            
+            <div class="logic-step">
+                X = (1.8 * 2047) / 3.3
+            </div>
+            <div class="logic-step">
+                X ≈ 0.545 * 2047 ≈ <strong>1116</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- EJERCICIO 2 -->
+    <div class="exercise">
+        <div class="exercise-header">EJERCICIO 2 (Timer)</div>
+
+        <div class="statement">
+            <strong>Enunciado 2.1</strong>
+            Partiendo de reloj 80MHz y divisor P=80, hallar el valor de cuenta (Valarm) para 15 ms.
+        </div>
+        <div class="solution">
+            <strong>Solución Lógica</strong>
+            <p>Calculamos lo que vale 1 "tic" del reloj y cuántos necesitamos.</p>
+            <div class="logic-step">
+                1. <strong>Velocidad del Timer:</strong> 80 MHz / 80 = <strong>1 MHz</strong> (1 millón de tics por segundo).
+            </div>
+            <div class="logic-step">
+                2. <strong>Tiempo de 1 tic:</strong> Si va a 1 MHz, cada tic dura <strong>1 microsegundo</strong> (1 µs).
+            </div>
+            <div class="logic-step">
+                3. <strong>Cuenta total:</strong> Queremos esperar 15 milisegundos = <strong>15.000 microsegundos</strong>.
+            </div>
+            <div class="math-block">
+                Valarm = 15000
+            </div>
+        </div>
+
+        <div class="statement">
+            <strong>Enunciado 2.2</strong>
+            Codificar la función de configuración del timer.
+        </div>
+        <div class="solution">
+            <strong>Solución</strong>
+            <pre>
+static void fcn_timer3_init() {
+    timer_config_t conf;
+    conf.alarm_en = TIMER_ALARM_EN;      // Activar alarma
+    conf.counter_en = TIMER_PAUSE;       // Empezar pausado
+    conf.intr_type = TIMER_INTR_LEVEL;   // Interrupción por nivel
+    conf.counter_dir = TIMER_COUNT_UP;   // Contar hacia arriba
+    conf.auto_reload = TIMER_AUTORELOAD_EN; // Auto-reinicio (periódico)
+    conf.divider = 80;                   // Divisor calculado antes
+
+    // Timer 3 es el Grupo 1, Timer 1
+    timer_init(TIMER_GROUP_1, TIMER_1, &conf);
+    timer_pause(TIMER_GROUP_1, TIMER_1);
+    
+    timer_set_counter_value(TIMER_GROUP_1, TIMER_1, 0); // Reset a 0
+    timer_set_alarm_value(TIMER_GROUP_1, TIMER_1, 15000); // Alarma a los 15000 tics
+    
+    timer_enable_intr(TIMER_GROUP_1, TIMER_1); // Habilitar interrupción
+    
+    // Registrar la función ISR (ISR_Timer3)
+    timer_isr_register(TIMER_GROUP_1, TIMER_1, ISR_Timer3, NULL, 0, NULL);
+    
+    timer_start(TIMER_GROUP_1, TIMER_1); // ¡Arrancar!
+}</pre>
+        </div>
+    </div>
+
+    <!-- EJERCICIO 3 -->
+    <div class="exercise">
+        <div class="exercise-header">EJERCICIO 3 (UART)</div>
+
+        <div class="statement">
+            <strong>Enunciado 3.1</strong>
+            Configurar UART1 a 9600 baudios, 1 byte, paridad par, 2 bits de stop usando librería Serial.
+        </div>
+        <div class="solution">
+            <strong>Solución</strong>
+            <pre>
+// Usamos la configuración 8E2 (8 datos, Even parity, 2 Stop)
+Serial.begin(9600, SERIAL_8E2);</pre>
+        </div>
+
+        <div class="statement">
+            <strong>Enunciado 3.2</strong>
+            Dibuja la trama y explica los bits.
+        </div>
+        <div class="solution">
+            <strong>Solución</strong>
+            <p>Una trama completa tiene estos bits en orden:</p>
+            <div class="math-block">
+                [START] + [8 BITS DATOS] + [PARIDAD] + [STOP] + [STOP]
+            </div>
+            <ul>
+                <li><strong>Start (0):</strong> Avisa que empieza el dato.</li>
+                <li><strong>Datos (8 bits):</strong> La información (byte).</li>
+                <li><strong>Paridad (1 bit):</strong> Bit extra para que la suma de '1's sea par (control de errores).</li>
+                <li><strong>Stop (2 bits):</strong> Dos bits en alto (1) para marcar el final y dar un respiro.</li>
+            </ul>
+        </div>
+
+        <div class="statement">
+            <strong>Enunciado 3.3</strong>
+            Calcula el Throughput (bits transmitidos por segundo).
+        </div>
+        <div class="solution">
+            <strong>Solución</strong>
+            <p>Si la velocidad es 9600 baudios, se transmiten <strong>9600 bits por segundo</strong> en el cable.</p>
+            <p><em>(Nota extra de lógica: De esos bits, algunos son "basura" o protocolo (start, stop, paridad) y solo 8 son datos útiles, pero el throughput de transmisión bruta es 9600).</em></p>
+        </div>
+    </div>
+
+    <!-- EJERCICIO 4 -->
+    <div class="exercise">
+        <div class="exercise-header">EJERCICIO 4 (I2C)</div>
+        <div class="statement">
+            <strong>Enunciado</strong>
+            Indicar qué es cada bit de la trama de lectura I2C y quién lo pone.
+        </div>
+        <div class="solution">
+            <strong>Solución</strong>
+            <ul>
+                <li><strong>S (Start):</strong> Inicio. Lo pone el <strong>MAESTRO</strong>.</li>
+                <li><strong>ADDRESS + R/W:</strong> A quién preguntamos y que queremos Leer (1). Lo pone el <strong>MAESTRO</strong>.</li>
+                <li><strong>A (ACK):</strong> "Te he escuchado". Lo pone el <strong>ESCLAVO</strong>.</li>
+                <li><strong>DATA:</strong> El dato solicitado. Lo pone el <strong>ESCLAVO</strong>.</li>
+                <li><strong>A (ACK):</strong> "Dato recibido, dame más". Lo pone el <strong>MAESTRO</strong>.</li>
+                <li><strong>Ā (NACK):</strong> "Ya no quiero más / Fin". Lo pone el <strong>MAESTRO</strong>.</li>
+                <li><strong>P (Stop):</strong> Fin. Lo pone el <strong>MAESTRO</strong>.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- EJERCICIO 5 -->
+    <div class="exercise">
+        <div class="exercise-header">EJERCICIO 5 (I2C Código)</div>
+        <div class="statement">
+            <strong>Enunciado 5.1 y 5.2</strong>
+            Leer 2 bytes del registro 0x66 del dispositivo 0xA3.
+        </div>
+        <div class="solution">
+            <strong>Solución Lógica y Código</strong>
+            <p><strong>OJO con la dirección:</strong> En Arduino las direcciones son de 7 bits. Si nos dan 0xA3 (8 bits lectura), la dividimos entre 2 (o desplazamos) &rarr; <code>0x51</code>.</p>
+            <pre>
+#define DIR_I2C 0x51
+#define REGISTRO 0x66
+
+uint16_t read_2bytes() {
+    uint16_t valor = 0;
+
+    // PASO 1: Decirle al dispositivo QUÉ registro queremos leer
+    Wire.beginTransmission(DIR_I2C);
+    Wire.write(REGISTRO);
+    // IMPORTANTE: 'false' hace un Restart, no suelta el bus.
+    Wire.endTransmission(false); 
+
+    // PASO 2: Pedirle 2 bytes
+    Wire.requestFrom(DIR_I2C, 2);
+
+    // PASO 3: Leerlos si han llegado
+    if (Wire.available() >= 2) {
+        uint8_t alto = Wire.read();
+        uint8_t bajo = Wire.read();
+        valor = (alto << 8) | bajo; // Juntarlos
+    }
+    return valor;
+}</pre>
+        </div>
+    </div>
+
+    <!-- EJERCICIO 6 -->
+    <div class="exercise">
+        <div class="exercise-header">EJERCICIO 6 (FreeRTOS)</div>
+        <div class="statement">
+            <strong>Enunciado</strong>
+            Sistema Temp/Humedad con 2 tareas, cola y semáforo.
+        </div>
+        <div class="solution">
+            <strong>Solución (Partes Clave)</strong>
+            
+            <p><strong>1. Configuración (setup):</strong></p>
+            <pre>
+// Crear Semáforo
+semaforo = xSemaphoreCreateBinary();
+
+// Crear Cola (para 100 estructuras)
+cola = xQueueCreate(100, sizeof(type_data_sensor));
+
+// Crear Tareas (pila 4096, prioridad 4)
+xTaskCreate(vTaskLeeSensor, "Lee", 4096, NULL, 4, NULL);
+xTaskCreate(vTaskCalcula, "Calc", 4096, NULL, 4, NULL);
+
+// Configurar Botón (Interrupción bajada)
+pinMode(39, INPUT_PULLUP);
+attachInterrupt(digitalPinToInterrupt(39), ISR_EXT, FALLING);</pre>
+
+            <p><strong>2. Tarea que Lee (vTaskLeeSensor):</strong></p>
+            <pre>
+while(1) {
+    // Leemos sensor
+    datos = f_obtener_valores_del_sensor();
+    
+    // Enviamos a la cola. Usamos portMAX_DELAY para asegurar que entra.
+    xQueueSend(cola, &datos, portMAX_DELAY);
+    
+    // Dormimos 10 minutos
+    vTaskDelay(pdMS_TO_TICKS(10 * 60 * 1000));
+}</pre>
+
+            <p><strong>3. Interrupción (ISR_EXT):</strong></p>
+            <pre>
+void IRAM_ATTR ISR_EXT() {
+    // Solo damos el semáforo para despertar a la otra tarea
+    xSemaphoreGiveFromISR(semaforo, &xHigherPriorityTaskWoken);
+    if(xHigherPriorityTaskWoken) portYIELD_FROM_ISR();
+}</pre>
+
+            <p><strong>4. Tarea que Calcula (vTaskCalculaMedia):</strong></p>
+            <pre>
+while(1) {
+    // Esperamos bloqueados hasta que alguien pulse el botón (semáforo)
+    xSemaphoreTake(semaforo, portMAX_DELAY);
+
+    // Vemos cuántos datos hay acumulados
+    int num = uxQueueMessagesWaiting(cola);
+    
+    // Los sacamos todos y procesamos
+    for(int i=0; i < num; i++) {
+        xQueueReceive(cola, &buffer[i], 0);
+    }
+    
+    // Calculamos y mostramos
+    resultado = f_calcula_media(buffer, num);
+    printf("Media: %f", resultado.avg_temp);
+}</pre>
+            
+            <p><strong>Pregunta Teórica (6.8):</strong> ¿Si se duerme el operario?
+            <br>La cola se llena (caben 100 lecturas, aprox 16 horas). Una vez llena, la tarea de lectura se queda bloqueada intentando meter más datos (si usamos delay infinito) o empieza a perder datos (si no esperamos). El sistema deja de registrar datos nuevos.</p>
+        </div>
+    </div>
+
+</body>
+</html>
